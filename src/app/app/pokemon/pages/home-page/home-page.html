@@ -1,0 +1,59 @@
+<app-breadcrumbs
+  [items]="[
+    { label: 'Inicio', link: '/' },
+    { label: '', link: '/simpsons' },
+    { label: 'Personajes' }
+  ]"
+/>
+<section class="p-8">
+  <app-hero-pokemon
+    [pokemonCount]="pokemonResource.value()?.count ?? 0"
+    [totalPage]="totalPages()"
+  ></app-hero-pokemon>
+
+  <!-- Mostrar spinner mientras se cargan los datos -->
+  <div *ngIf="pokemonResource.isLoading()" class="flex justify-center items-center h-64">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+
+  <!-- Paginación y controles -->
+  <div *ngIf="pokemonResource.hasValue()" class="flex gap-2 items-center h-20 mb-4">
+    <app-pagination
+      [pages]="pokemonResource.value()?.pages ?? 0"
+      [currentPage]="paginationService.currentPage()"
+    ></app-pagination>
+    <div class="flex flex-1"></div>
+  </div>
+
+  <!-- Tabla de personajes -->
+  <div *ngIf="pokemonResource.hasValue()" class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Ocupación</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let personaje of pokemonResource.value()?.results; trackBy: personaje.id">
+          <td>{{ personaje.id }}</td>
+          <td>{{ personaje.name }}</td>
+          <td>{{ personaje.occupation }}</td>
+          <td>
+            <span class="badge badge-{{ personaje.status === 'Alive' ? 'success' : 'error' }}">
+              {{ personaje.status }}
+            </span>
+          </td>
+          <td>
+            <a [routerLink]="['/pokemon/', personaje.id]" class="btn btn-sm btn-primary">
+              Ver Detalle
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
