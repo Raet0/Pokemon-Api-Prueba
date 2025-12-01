@@ -1,59 +1,63 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  signal
-} from '@angular/core';
-
+import { Component, signal, computed, effect, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { PokemonService } from '../../services/pokemon-service';
-import { PaginationService } from '../../services/pagination-service';
 
-import { Breadcrumbs } from "../../../features/components/breadcrumbs/breadcrumbs";
-import { HeroPokemon } from "../../../features/components/hero-pokemon/hero-pokemon";
-import { Pagination } from "../../../features/components/pagination/pagination";
-
-import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+interface PokemonResponse {
+  count: number;
+  results: Array<{ name: string; url: string }>;
+}
 
 @Component({
   selector: 'app-home-page',
-  imports: [Breadcrumbs, HeroPokemon, RouterModule, Pagination],
-  templateUrl: './home-page.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './home-page.html'
 })
-export class HomePage {
+export class HomePage implements OnInit {
+  offset = signal(0);
+  limit = 20;
 
-  private pokemonService = inject(PokemonService);
-  paginationService = inject(PaginationService);
+  pokemonData = signal<PokemonResponse | null>(null);
+  isLoading = signal(false);
 
-  charactersPerPage = signal(20);
-  totalPages = signal(0);
+  items = computed(() => this.pokemonData()?.results || []);
+  total = computed(() => this.pokemonData()?.count || 0);
 
-  constructor() {
+  constructor(private svc: PokemonService, private router: Router) {
     effect(() => {
-      if (this.pokemonResource.hasValue()) {
-        this.totalPages.set(this.pokemonResource.value()?.count ?? 0);
-      }
+      const offset = this.offset();
+      this.loadPokemon(offset);
     });
   }
 
-  // RESOURCE PRINCIPAL DE POKEMON
-  pokemonResource = rxResource({
-    params: () => ({
-      page: this.paginationService.currentPage() - 1,
-      limit: this.charactersPerPage()
-    }),
+  ngOnInit(): void {}
 
-    stream: ({ params }) => {
-      const offset = params.page * params.limit;
-      return this.pokemonService.getPokemons(offset, params.limit); // Usar el método correcto
+  private loadPokemon(offset: number): void {
+    this.isLoading.set(true);
+    this.svc.list(offset, this.limit).subscribe({
+      next: (data: any) => {
+        this.pokemonData.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
+
+  next(): void {
+    const newOffset = this.offset() + this.limit;
+    if (newOffset < this.total()) {
+      this.offset.set(newOffset);
     }
-  });
+  }
 
-  // EXTRAE ID DESDE URL
-  extractId(url: string): number {
-    const parts = url.split('/');
-    return Number(parts[parts.length - 2]);
+  prev(): void {
+    const newOffset = Math.max(0, this.offset() - this.limit);
+    this.offset.set(newOffset);
+  }
+
+  goToDetail(url: string): void {
+    const id = this.svc.extractIdFromUrl(url);
+    this.router.navigate(['/pokemon', id]);
   }
 }

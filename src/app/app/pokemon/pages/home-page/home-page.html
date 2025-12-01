@@ -1,59 +1,61 @@
-<app-breadcrumbs
-  [items]="[
-    { label: 'Inicio', link: '/' },
-    { label: '', link: '/simpsons' },
-    { label: 'Personajes' }
-  ]"
-/>
-<section class="p-8">
-  <app-hero-pokemon
-    [pokemonCount]="pokemonResource.value()?.count ?? 0"
-    [totalPage]="totalPages()"
-  ></app-hero-pokemon>
+<section class="min-h-screen bg-linear-to-b from-cyan-100 to-blue-200">
 
-  <!-- Mostrar spinner mientras se cargan los datos -->
-  <div *ngIf="pokemonResource.isLoading()" class="flex justify-center items-center h-64">
-    <span class="loading loading-spinner loading-lg"></span>
-  </div>
+  <header class="hero bg-primary text-white py-8 px-4">
+    <div class="hero-content text-center">
+      <h1 class="text-4xl font-bold  text-black mt-1">Pokédex</h1>
+      <p class="text-xl mt-2 text-zinc-800">Total de Pokémon: <span class="font-bold">{{ total() }}</span></p>
+    </div>
+  </header>
 
-  <!-- Paginación y controles -->
-  <div *ngIf="pokemonResource.hasValue()" class="flex gap-2 items-center h-20 mb-4">
-    <app-pagination
-      [pages]="pokemonResource.value()?.pages ?? 0"
-      [currentPage]="paginationService.currentPage()"
-    ></app-pagination>
-    <div class="flex flex-1"></div>
-  </div>
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-12">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+  }
 
-  <!-- Tabla de personajes -->
-  <div *ngIf="pokemonResource.hasValue()" class="overflow-x-auto">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Ocupación</th>
-          <th>Estado</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let personaje of pokemonResource.value()?.results; trackBy: personaje.id">
-          <td>{{ personaje.id }}</td>
-          <td>{{ personaje.name }}</td>
-          <td>{{ personaje.occupation }}</td>
-          <td>
-            <span class="badge badge-{{ personaje.status === 'Alive' ? 'success' : 'error' }}">
-              {{ personaje.status }}
-            </span>
-          </td>
-          <td>
-            <a [routerLink]="['/pokemon/', personaje.id]" class="btn btn-sm btn-primary">
-              Ver Detalle
-            </a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (pokemonData(); as data) {
+    <div class="container mx-auto px-4 py-8">
+
+      <ul class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        @for (pokemon of items(); track pokemon.name) {
+          <li class="h-full">
+            <article class=" p-1 card card-compact bg-base-100 shadow-lg hover:shadow-xl transition-shadow cursor-pointer h-full rounded-2xl border border-blue-500">
+              <div class="card-body">
+                <h3 class="card-title text-lg capitalize">{{ pokemon.name }}</h3>
+                <div class="card-actions justify-end mt-4">
+                  <button
+                    class="btn btn-sm btn-primary w-full"
+                    (click)="goToDetail(pokemon.url)"
+                  >
+                    Ver detalle del pokemon
+                  </button>
+                </div>
+              </div>
+            </article>
+          </li>
+        }
+      </ul>
+
+
+      <div class="flex justify-center gap-4 mt-8 pb-8">
+        <button
+          class="btn btn-outline"
+          (click)="prev()"
+          [disabled]="offset() === 0"
+        >
+          ← Anterior
+        </button>
+        <span class="flex items-center px-4 font-semibold">
+          Página {{ (offset() / limit) + 1 }}
+        </span>
+        <button
+          class="btn btn-primary"
+          (click)="next()"
+          [disabled]="offset() + limit >= total()"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
+  }
 </section>

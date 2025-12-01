@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-pagination',
-  imports: [RouterModule, Breadcrumbs,Pagination],
+  imports: [RouterModule],
   templateUrl: './pagination.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

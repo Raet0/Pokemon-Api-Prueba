@@ -1,24 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class PokemonService {
-  private readonly baseUrl = 'https://pokeapi.co/api/v2/pokemon';
+const BASE = 'https://pokeapi.co/api/v2/pokemon';
 
+@Injectable({ providedIn: 'root' })
+export class PokemonService {
   constructor(private http: HttpClient) {}
 
-  // Método obligatorio 1: lista con paginación
-  getPokemons(offset: number, limit: number): Observable<any> {
-    const url = `${this.baseUrl}?offset=${offset}&limit=${limit}`;
-    return this.http.get<any>(url);
+  list(offset = 0, limit = 20): Observable<any> {
+    return this.http.get(`${BASE}?offset=${offset}&limit=${limit}`);
   }
 
-  // Método obligatorio 2: detalle
-  getPokemonDetail(id: number | string): Observable<any> {
-    const url = `${this.baseUrl}/${id}`;
-    return this.http.get<any>(url);
+  getById(id: string | number) {
+    return this.http.get(`${BASE}/${id}`);
+  }
+
+  // ayuda: extraer id desde la url de result
+  extractIdFromUrl(url: string) {
+    const parts = url.split('/').filter(Boolean);
+    return parts[parts.length - 1];
   }
 }

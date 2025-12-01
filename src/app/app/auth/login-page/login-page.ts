@@ -36,7 +36,7 @@ export class LoginPage {
     const { email, password } = this.form.value;
 
     if (email === USER.email && password === USER.password) {
-      this.router.navigate(['/home']);
+      this.router.navigate(['home']);
     } else {
       this.errorMessage.set('Credenciales incorrectas');
     }
