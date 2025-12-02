@@ -26,6 +26,11 @@
           formControlName="password"
           class="input input-bordered w-full"
         />
+        <div>
+          <p>Datos a ingresar:</p>
+          <p>user: usuario@ups.edu.ec</p>
+          <p>password: 123456</p>
+        </div>
         @if (form.controls.password.invalid && form.controls.password.touched) {
           <p class="text-red-600 text-sm">
             El password debe tener mínimo 6 caracteres.

@@ -1,61 +1,89 @@
-<section class="from-green-200 to-green-400 bg-linear-to-b min-h-screen p-4">
+<section class="min-h-screen bg-slate-50 py-12 px-4 flex items-center justify-center animate-fade-in">
+  
   @if (pokemonData(); as pokemon) {
-  <article class=" from-cyan-300 to-cyan-100 bg-linear-to-b border-2 border-cyan-200 rounded-3xl max-w-2xl m-auto p-6">
-    <header class="text-center">
-      <h1 class="text-4xl font-bold capitalize">{{ pokemon.name }}</h1>
-    </header>
+    <article class="w-full max-w-2xl bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+      
+      <!-- Header con fondo oscuro y efecto radial -->
+      <header class="bg-slate-900 text-white p-8 text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent scale-150"></div>
+        
+        <h1 class="text-4xl font-extrabold capitalize relative z-10 tracking-tight">{{ pokemon.name }}</h1>
+        <div class="mt-2 text-slate-400 text-sm font-medium relative z-10 uppercase tracking-widest">Detalle del Pokémon</div>
+      </header>
 
-    <figure class="text-center">
-      <img [src]="pokemon.sprites.front_default" alt="{{ pokemon.name }}" class="w-lg h-128 m-auto" />
-    </figure>
-
-    <section class="space-y-4">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <h3 class="font-semibold text-lg border-b-2 border-amber-950">Altura</h3>
-          <p class="text-gray-800 ">{{ pokemon.height / 10 }} m</p>
+      <!-- Contenido Principal -->
+      <div class="p-8">
+        
+        <!-- Imagen Heroica -->
+        <div class="flex justify-center -mt-20 mb-8 relative z-20">
+          <div class="bg-white p-4 rounded-full shadow-lg border-4 border-slate-50">
+            <!-- Intenta cargar el Arte Oficial, si no existe, usa el sprite default -->
+            <img 
+              [src]="pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default" 
+              [alt]="pokemon.name" 
+              class="w-48 h-48 object-contain" 
+            />
+          </div>
         </div>
-        <div>
-          <h3 class="font-semibold text-lg border-b-2 border-amber-950">Peso</h3>
-          <p class="text-gray-800">{{ pokemon.weight / 10 }} kg</p>
-        </div>
-      </div>
 
-      <div>
-        <h3 class="font-semibold text-lg border-b-2 border-amber-950">Experiencia Base</h3>
-        <p class="text-gray-800">{{ pokemon.base_experience }}</p>
-      </div>
-
-      <div>
-        <h3 class="font-semibold text-lg border-b-2 border-amber-950">Tipos</h3>
-        <div class="flex gap-2 flex-wrap">
+        <!-- Badges de Tipos -->
+        <div class="flex justify-center gap-3 mb-10">
           @for (t of pokemon.types; track $index) {
-          <span class="badge badge-primary">{{ t.type.name }}</span>
+            <span class="px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide bg-slate-100 text-slate-700 border border-slate-200">
+              {{ t.type.name }}
+            </span>
           }
         </div>
-      </div>
 
-      <div>
-        <h3 class="font-semibold text-lg border-b-2 border-amber-950">Movimientos</h3>
-        <p class="text-gray-800">{{ pokemon.moves.length }} movimientos disponibles</p>
-      </div>
-
-      <div>
-        <h3 class="font-semibold text-lg border-b-2 border-amber-950">Habilidades</h3>
-        <div class="flex gap-2 flex-wrap">
-          @for (ab of pokemon.abilities; track $index) {
-          <span class="badge">{{ ab.ability.name }}</span>
-          }
+        <!-- Grid de Stats Limpio -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center mb-10">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Altura</p>
+            <p class="text-xl font-bold text-slate-800">{{ pokemon.height / 10 }} m</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Peso</p>
+            <p class="text-xl font-bold text-slate-800">{{ pokemon.weight / 10 }} kg</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Exp. Base</p>
+            <p class="text-xl font-bold text-slate-800">{{ pokemon.base_experience }}</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Movs</p>
+            <p class="text-xl font-bold text-slate-800">{{ pokemon.moves.length }}</p>
+          </div>
         </div>
-      </div>
-    </section>
 
-    <button class="btn btn-primary mt-6" (click)="back()">← Volver a inicio</button>
-  </article>
+        <!-- Sección de Habilidades -->
+        <div class="mb-8">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Habilidades</h3>
+          <div class="flex flex-wrap gap-2">
+            @for (ab of pokemon.abilities; track $index) {
+              <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100 uppercase">
+                {{ ab.ability.name }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- Botón Volver -->
+        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+          <button 
+            class="group inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95 shadow-sm"
+            (click)="back()">
+            <span class="group-hover:-translate-x-1 transition-transform duration-200">←</span> 
+            Volver a la lista
+          </button>
+        </div>
+
+      </div>
+    </article>
   } @else if (isLoading()) {
-  <div class="flex justify-center items-center h-screen">
-    <span class="loading loading-spinner loading-lg"></span>
-  </div>
+    <div class="flex flex-col items-center gap-4 h-screen justify-center">
+      <span class="loading loading-spinner loading-lg text-slate-900"></span>
+      <p class="text-slate-400 text-sm animate-pulse">Cargando datos...</p>
+    </div>
   }
 
 </section>

@@ -1,61 +1,129 @@
-<section class="min-h-screen bg-linear-to-b from-cyan-100 to-blue-200">
-
-  <header class="hero bg-primary text-white py-8 px-4">
-    <div class="hero-content text-center">
-      <h1 class="text-4xl font-bold  text-black mt-1">Pokédex</h1>
-      <p class="text-xl mt-2 text-zinc-800">Total de Pokémon: <span class="font-bold">{{ total() }}</span></p>
+<div class="min-h-screen bg-slate-50 font-sans text-slate-800">
+  
+  <!-- Header: Sticky y Minimalista -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- Icono decorativo simple -->
+        <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-lg">
+          P
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-none">Pokédex</h1>
+          <p class="text-xs text-slate-500 mt-0.5">Total: <span class="font-medium text-slate-700">{{ total() }}</span> registros</p>
+        </div>
+      </div>
+      
+      <button 
+        class="text-xs font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 px-3 py-2 rounded-lg transition-colors" 
+        (click)="goToFirstPage()" 
+        [disabled]="offset() === 0">
+        Inicio
+      </button>
     </div>
   </header>
 
-  @if (isLoading()) {
-    <div class="flex justify-center items-center py-12">
-      <span class="loading loading-spinner loading-lg text-primary"></span>
-    </div>
-  }
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    
+    <!-- Loading State: Skeleton List (Cargando) -->
+    @if (isLoading()) {
+      <div class="space-y-4 animate-pulse">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          <div class="h-20 w-full bg-slate-200 rounded-xl"></div>
+        }
+      </div>
+    }
 
-  @if (pokemonData(); as data) {
-    <div class="container mx-auto px-4 py-8">
-
-      <ul class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <!-- Lista de Pokémon (Vertical y Limpia) -->
+    @if (pokemonData(); as data) {
+      <ul class="flex flex-col gap-3">
         @for (pokemon of items(); track pokemon.name) {
-          <li class="h-full">
-            <article class=" p-1 card card-compact bg-base-100 shadow-lg hover:shadow-xl transition-shadow cursor-pointer h-full rounded-2xl border border-blue-500">
-              <div class="card-body">
-                <h3 class="card-title text-lg capitalize">{{ pokemon.name }}</h3>
-                <div class="card-actions justify-end mt-4">
-                  <button
-                    class="btn btn-sm btn-primary w-full"
-                    (click)="goToDetail(pokemon.url)"
-                  >
-                    Ver detalle del pokemon
-                  </button>
+          <li class="group">
+            <article 
+              (click)="goToDetail(pokemon.url)"
+              class="relative flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+              
+              <!-- Izquierda: Imagen + Info -->
+              <div class="flex items-center gap-5">
+                <!-- Avatar Container -->
+                <div class="w-16 h-16 bg-slate-50 rounded-lg flex items-center justify-center shrink-0 border border-slate-100 group-hover:bg-blue-50 transition-colors">
+                  @if (pokemon.image) {
+                    <img 
+                      [src]="pokemon.image" 
+                      [alt]="pokemon.name" 
+                      loading="lazy"
+                      class="w-12 h-12 object-contain drop-shadow-sm group-hover:scale-110 transition-transform duration-300"
+                      (error)="handleImageError($event)" 
+                    />
+                  } @else {
+                    <div class="text-[10px] text-slate-400 text-center leading-tight">Sin<br>Img</div>
+                  }
                 </div>
+                
+                <!-- Info Text -->
+                <div class="flex flex-col">
+                  <span class="text-[10px] font-bold text-slate-400 tracking-wider">POKÉMON</span>
+                  <h3 class="text-lg font-bold capitalize text-slate-800 group-hover:text-blue-600 transition-colors">
+                    {{ pokemon.name }}
+                  </h3>
+                </div>
+              </div>
+
+              <!-- Derecha: Botón 'Ver' (Animado) -->
+              <div class="pr-2 flex items-center">
+                <button 
+                  class="hidden sm:block opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300 bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
+                  Ver Detalles
+                </button>
+                <!-- Flecha para móviles -->
+                <span class="sm:hidden text-slate-300 text-xl">›</span>
               </div>
             </article>
           </li>
         }
       </ul>
 
+      <!-- Paginación -->
+      <nav class="mt-12 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        
+        <!-- Controles Izquierda -->
+        <div class="flex gap-2">
+          <button 
+            class="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-30 transition-colors"
+            (click)="jumpBackward5()" 
+            [disabled]="offset() === 0"
+            title="-5 Páginas">
+            «
+          </button>
+          <button 
+            class="px-4 py-1.5 text-sm font-medium border border-slate-200 rounded-lg text-slate-600 hover:bg-white hover:border-slate-300 hover:shadow-sm disabled:opacity-50 transition-all"
+            (click)="prev()" 
+            [disabled]="offset() === 0">
+            Anterior
+          </button>
+        </div>
 
-      <div class="flex justify-center gap-4 mt-8 pb-8">
-        <button
-          class="btn btn-outline"
-          (click)="prev()"
-          [disabled]="offset() === 0"
-        >
-          ← Anterior
-        </button>
-        <span class="flex items-center px-4 font-semibold">
-          Página {{ (offset() / limit) + 1 }}
+        <span class="text-sm font-medium text-slate-400">
+          Página <span class="text-slate-900">{{ (offset() / limit) + 1 }}</span>
         </span>
-        <button
-          class="btn btn-primary"
-          (click)="next()"
-          [disabled]="offset() + limit >= total()"
-        >
-          Siguiente →
-        </button>
-      </div>
-    </div>
-  }
-</section>
+
+        <!-- Controles Derecha -->
+        <div class="flex gap-2">
+          <button 
+            class="px-4 py-1.5 text-sm font-medium bg-slate-900 text-white rounded-lg shadow-md hover:bg-slate-800 active:scale-95 disabled:opacity-50 disabled:active:scale-100 transition-all"
+            (click)="next()" 
+            [disabled]="offset() + limit >= total()">
+            Siguiente
+          </button>
+          <button 
+            class="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-30 transition-colors"
+            (click)="jumpForward5()" 
+            [disabled]="offset() >= lastPageStart()"
+            title="+5 Páginas">
+            »
+          </button>
+        </div>
+      </nav>
+    }
+  </main>
+</div>
